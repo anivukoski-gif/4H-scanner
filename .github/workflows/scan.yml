@@ -1,0 +1,21 @@
+name: H4 Trade Scanner
+
+on:
+  schedule:
+    - cron: '0 7 * * 1-5'   # 10:00 Helsinki
+    - cron: '0 13 * * 1-5'  # 16:00 Helsinki
+    - cron: '0 20 * * 1-5'  # 23:00 Helsinki
+  workflow_dispatch:          # lets you trigger manually too
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scan.js
+        env:
+          TWELVEDATA_KEY: ${{ secrets.TWELVEDATA_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
