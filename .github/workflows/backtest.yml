@@ -1,4 +1,4 @@
-name: Backtest
+name: H4 Strategy Backtest
 
 on:
   workflow_dispatch:
@@ -6,15 +6,21 @@ on:
 jobs:
   backtest:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
+          node-version: '20'
       - name: Run backtest
+        run: node backtest.js
         env:
           TWELVEDATA_KEY: ${{ secrets.TWELVEDATA_KEY }}
-        run: node backtest.js
+      - name: Commit results page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backtest.html
+          git commit -m "Backtest results $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nothing to commit"
+          git push
