@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiraled — Backtest Results</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap');
+  :root{--cream:#F4EFE6;--paper:#FBF8F2;--ink:#2E2A24;--terra:#B5654A;--sage:#5F7A52;--line:#DCD3C2;--muted:#8C8475;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;padding:32px 20px 80px;}
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-bottom:4px;}
+  .meta{font-size:12px;color:var(--muted);margin-bottom:32px;letter-spacing:.04em;}
+  h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;margin:32px 0 14px;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:28px;}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px 16px;}
+  .stat .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;}
+  .stat .value{font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:600;}
+  .stat .value.pos{color:var(--sage);}
+  .stat .value.neg{color:var(--terra);}
+  .chart-wrap{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:20px;margin-bottom:20px;}
+  .chart-wrap canvas{max-height:240px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--paper);border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);font-weight:400;}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .win{color:var(--sage);}
+  .loss{color:var(--terra);}
+  .timeout{color:var(--muted);}
+  .pair-section{margin-bottom:40px;}
+  .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:10px;font-weight:500;}
+  .tag.pos{background:rgba(95,122,82,.12);color:var(--sage);}
+  .tag.neg{background:rgba(181,101,74,.12);color:var(--terra);}
+  .tag.neu{background:rgba(140,132,117,.12);color:var(--muted);}
+  footer{margin-top:40px;font-size:11px;color:var(--muted);text-align:center;line-height:1.7;}
+  @media(max-width:500px){.cards{grid-template-columns:1fr 1fr;} h1{font-size:26px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Backtest Results</h1>
+  <div class="meta">Spiraled H4 Scanner &nbsp;·&nbsp; Walk-forward simulation, no look-ahead &nbsp;·&nbsp; Run 2026-07-26 11:55 UTC</div>
+
+  <h2>Combined — All Pairs</h2>
+  <p style="color:var(--muted);font-size:13px;">No trades generated across all pairs.</p>
+
+  <div class="pair-section"><h2>EUR/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles, 2023-08-11 → 2026-07-26).</p></div><div class="pair-section"><h2>GBP/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles, 2023-08-14 → 2026-07-26).</p></div><div class="pair-section"><h2>USD/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles, 2023-08-08 → 2026-07-26).</p></div><div class="pair-section"><h2>EUR/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles, 2023-08-14 → 2026-07-26).</p></div><div class="pair-section"><h2>GBP/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles, 2023-08-12 → 2026-07-26).</p></div>
+
+  <footer>Walk-forward backtest — signal detection uses only data available at entry time.<br>Past results do not guarantee future performance. Always verify setups visually before trading.</footer>
+</div>
+
+<script>
+const cream = '#F4EFE6';
+const sage  = '#5F7A52';
+const terra = '#B5654A';
+const muted = '#8C8475';
+
+function drawEquity(id, equity, label) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  const colors = equity.map((v,i) => i===0 ? 'transparent' : equity[i]>=equity[i-1] ? sage : terra);
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: equity.map((_,i)=>i===0?'Start':'Trade '+i),
+      datasets: [{
+        label: label,
+        data: equity,
+        borderColor: parseFloat(equity[equity.length-1]) >= 0 ? sage : terra,
+        borderWidth: 2,
+        pointRadius: equity.length > 40 ? 0 : 3,
+        pointBackgroundColor: colors,
+        fill: true,
+        backgroundColor: parseFloat(equity[equity.length-1]) >= 0
+          ? 'rgba(95,122,82,0.08)' : 'rgba(181,101,74,0.08)',
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(2) + 'R' } }
+      },
+      scales: {
+        x: { display: false },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { callback: v => v+'R', font: { family: 'Jost', size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+
+
+</script>
+</body>
+</html>
