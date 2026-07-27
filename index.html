@@ -6,15 +6,15 @@
 <title>Spiraled — H4 Trade Scanner</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap');
-  :root{--cream:#F4EFE6;--paper:#FBF8F2;--ink:#2E2A24;--terracotta:#B5654A;--terracotta-deep:#9A4F38;--sage:#7C8466;--line:#DCD3C2;--muted:#8C8475;--no:#B5654A;--yes:#5F7A52;}
+  :root{--cream:#F4EFE6;--paper:#FBF8F2;--ink:#2E2A24;--terracotta:#B5654A;--terracotta-deep:#9A4F38;--line:#DCD3C2;--muted:#8C8475;--no:#B5654A;--yes:#5F7A52;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;}
-  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;}
   .wrap{max-width:880px;margin:0 auto;padding:36px 22px 80px;}
   header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
-  header h1{font-size:34px;font-weight:600;margin:0;letter-spacing:.01em;}
+  header h1{font-size:34px;font-weight:600;margin:0;}
   header .tag{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
-  .lede{color:var(--muted);font-size:14.5px;margin:2px 0 28px;max-width:60ch;line-height:1.5;}
+  .lede{color:var(--muted);font-size:14px;margin:2px 0 28px;line-height:1.5;}
   .panel{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:20px 22px;margin-bottom:18px;}
   .panel-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:8px;}
   .panel-title::after{content:"";flex:1;height:1px;background:var(--line);}
@@ -22,13 +22,13 @@
   input[type=text],input[type=password],input[type=number]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:2px;background:#fff;font-family:'Jost',sans-serif;font-size:14px;color:var(--ink);}
   input:focus{outline:1px solid var(--terracotta);}
   .row{display:flex;gap:14px;flex-wrap:wrap;}
-  .row > div{flex:1;min-width:140px;}
+  .row>div{flex:1;min-width:140px;}
   button{font-family:'Jost',sans-serif;font-weight:500;font-size:13px;letter-spacing:.04em;background:var(--ink);color:var(--paper);border:none;border-radius:2px;padding:11px 20px;cursor:pointer;transition:opacity .15s;}
   button:hover{opacity:.85;}
   button.secondary{background:transparent;color:var(--ink);border:1px solid var(--line);}
   button:disabled{opacity:.4;cursor:not-allowed;}
   .keyrow{display:flex;gap:10px;align-items:flex-end;}
-  .keyrow > div{flex:1;}
+  .keyrow>div{flex:1;}
   .status-line{font-size:12px;color:var(--muted);margin-top:8px;}
   .status-line.ok{color:var(--yes);}
   .status-line.err{color:var(--no);}
@@ -36,7 +36,7 @@
   .checklist{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
   .checklist label{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--ink);cursor:pointer;}
   .checklist input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--terracotta);}
-  .helper-link{color:var(--terracotta-deep);text-decoration:underline;text-underline-offset:2px;}
+  .helper-link{color:var(--terracotta-deep);text-decoration:underline;}
   .cards{display:flex;flex-direction:column;gap:16px;margin-top:8px;}
   .card{background:var(--paper);border:1px solid var(--line);border-radius:2px;overflow:hidden;}
   .card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
@@ -51,14 +51,12 @@
   .step .mark{width:16px;flex-shrink:0;font-size:13px;margin-top:1px;}
   .step.pass .mark{color:var(--yes);}
   .step.fail .mark{color:var(--no);}
-  .step .label{color:var(--ink);}
   .step .detail{color:var(--muted);}
   .trade-summary{background:rgba(181,101,74,.06);border:1px solid rgba(181,101,74,.25);border-radius:2px;padding:14px 16px;margin-top:14px;}
   .trade-summary .row2{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;flex-wrap:wrap;gap:4px;}
   .trade-summary .row2 .k{color:var(--muted);}
   .trade-summary .row2 .v{font-weight:500;}
   .manual-block{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
-  .manual-block .panel-title{margin-bottom:10px;}
   .err-box{padding:14px 20px;color:var(--no);font-size:13px;}
   .loading{padding:30px;text-align:center;color:var(--muted);font-size:13px;}
   footer{margin-top:30px;font-size:11.5px;color:var(--muted);line-height:1.6;text-align:center;}
@@ -70,7 +68,7 @@
     <h1>Spiraled</h1>
     <div class="tag">H4 Trade Scanner</div>
   </header>
-  <p class="lede">Runs your 8-step Tori Trades framework against live H4 candles. Objective steps checked automatically; judgment calls are yours to confirm.</p>
+  <p class="lede">Tori Trades A+ framework on live H4 candles. Objective steps checked automatically — judgment calls (news, forced setup, Friday) are yours.</p>
 
   <div class="panel">
     <div class="panel-title">Data source</div>
@@ -88,8 +86,8 @@
         <input type="number" id="accountSize" placeholder="e.g. 10000">
       </div>
       <div>
-        <label for="riskPct">Risk per trade %</label>
-        <input type="number" id="riskPct" value="0.5" step="0.05">
+        <label for="riskPct">Risk % (0.25–0.5)</label>
+        <input type="number" id="riskPct" value="0.5" step="0.05" min="0.25" max="0.5">
       </div>
     </div>
     <button class="scan-btn" id="scanBtn">Scan all pairs</button>
@@ -97,61 +95,39 @@
   </div>
 
   <div id="results" class="cards"></div>
-
-  <footer>Heuristic scanner — not financial advice. Always verify visually and check news before entering a trade.</footer>
+  <footer>Heuristic scanner — not financial advice. Always verify visually and check news before entering.</footer>
 </div>
 
 <script>
-const PAIRS = ["EUR/USD","GBP/USD","USD/JPY","EUR/JPY","GBP/JPY"];
-const apiKeyInput = document.getElementById('apiKey');
-const keyStatus = document.getElementById('keyStatus');
-const resultsEl = document.getElementById('results');
-const scanStatus = document.getElementById('scanStatus');
-const scanBtn = document.getElementById('scanBtn');
+const PAIRS=["EUR/USD","GBP/USD","USD/JPY","EUR/JPY","GBP/JPY"];
+const apiKeyInput=document.getElementById('apiKey');
+const keyStatus=document.getElementById('keyStatus');
+const resultsEl=document.getElementById('results');
+const scanStatus=document.getElementById('scanStatus');
+const scanBtn=document.getElementById('scanBtn');
 
-// Storage
-function loadKey(){
-  try{
-    const v = localStorage.getItem('twelvedata_api_key');
-    if(v){ apiKeyInput.value=v; keyStatus.textContent='Saved key loaded.'; keyStatus.className='status-line ok'; }
-  }catch(e){}
-}
+function loadKey(){try{const v=localStorage.getItem('twelvedata_api_key');if(v){apiKeyInput.value=v;keyStatus.textContent='Saved key loaded.';keyStatus.className='status-line ok';}}catch(e){}}
 document.getElementById('saveKeyBtn').addEventListener('click',()=>{
   const v=apiKeyInput.value.trim();
-  if(!v){ keyStatus.textContent='Enter a key first.'; keyStatus.className='status-line err'; return; }
-  try{
-    localStorage.setItem('twelvedata_api_key',v);
-    keyStatus.textContent='Key saved in this browser.'; keyStatus.className='status-line ok';
-  }catch(e){
-    keyStatus.textContent='Could not save (private mode?). Key is still usable this session.'; keyStatus.className='status-line err';
-  }
+  if(!v){keyStatus.textContent='Enter a key first.';keyStatus.className='status-line err';return;}
+  try{localStorage.setItem('twelvedata_api_key',v);keyStatus.textContent='Key saved.';keyStatus.className='status-line ok';}
+  catch(e){keyStatus.textContent='Could not save (private mode?). Key usable this session.';keyStatus.className='status-line err';}
 });
 loadKey();
 
-// Fetch candles from Twelve Data
-async function fetchCandles(symbol, apiKey){
+async function fetchCandles(symbol,apiKey){
   const url=`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=4h&outputsize=200&apikey=${apiKey}`;
   const res=await fetch(url);
   const data=await res.json();
   if(data.status==='error'||!data.values) throw new Error(data.message||'No data returned');
-  return data.values.map(v=>({
-    t:new Date(v.datetime).getTime(),
-    o:parseFloat(v.open),h:parseFloat(v.high),l:parseFloat(v.low),c:parseFloat(v.close)
-  })).reverse();
+  return data.values.map(v=>({t:new Date(v.datetime).getTime(),o:parseFloat(v.open),h:parseFloat(v.high),l:parseFloat(v.low),c:parseFloat(v.close)})).reverse();
 }
 
-// Analysis helpers
 function calcATR(candles,period){
   const trs=[];
-  for(let i=1;i<candles.length;i++){
-    const c=candles[i],p=candles[i-1];
-    trs.push(Math.max(c.h-c.l,Math.abs(c.h-p.c),Math.abs(c.l-p.c)));
-  }
+  for(let i=1;i<candles.length;i++){const c=candles[i],p=candles[i-1];trs.push(Math.max(c.h-c.l,Math.abs(c.h-p.c),Math.abs(c.l-p.c)));}
   const out=[];
-  for(let i=0;i<trs.length;i++){
-    const sl=trs.slice(Math.max(0,i-period+1),i+1);
-    out.push(sl.reduce((a,b)=>a+b,0)/sl.length);
-  }
+  for(let i=0;i<trs.length;i++){const sl=trs.slice(Math.max(0,i-period+1),i+1);out.push(sl.reduce((a,b)=>a+b,0)/sl.length);}
   return out;
 }
 
@@ -159,54 +135,65 @@ function findPivots(candles,lookback=3){
   const highs=[],lows=[];
   for(let i=lookback;i<candles.length-lookback;i++){
     const w=candles.slice(i-lookback,i+lookback+1),c=candles[i];
-    if(c.h===Math.max(...w.map(x=>x.h))) highs.push({i,price:c.h});
-    if(c.l===Math.min(...w.map(x=>x.l))) lows.push({i,price:c.l});
+    if(c.h===Math.max(...w.map(x=>x.h)))highs.push({i,price:c.h});
+    if(c.l===Math.min(...w.map(x=>x.l)))lows.push({i,price:c.l});
   }
   return{highs,lows};
 }
 
 function linReg(pts){
-  const n=pts.length;
-  const sx=pts.reduce((a,p)=>a+p.i,0),sy=pts.reduce((a,p)=>a+p.price,0);
+  const n=pts.length,sx=pts.reduce((a,p)=>a+p.i,0),sy=pts.reduce((a,p)=>a+p.price,0);
   const sxy=pts.reduce((a,p)=>a+p.i*p.price,0),sxx=pts.reduce((a,p)=>a+p.i*p.i,0);
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx||1);
-  const intercept=(sy-slope*sx)/n;
-  return{slope,intercept};
+  return{slope,intercept:(sy-slope*sx)/n};
 }
 
-// 3+ taps with 6+ candle spacing — Tori's core rule
-function findValidTaps(pts,minSpacing=6,minTaps=3){
+function findValidTaps(pts,minSpacing=4,minTaps=2,maxTaps=3){
   const taps=[];
   for(let i=pts.length-1;i>=0;i--){
-    if(taps.length===0){ taps.unshift(pts[i]); }
-    else if(taps[0].i-pts[i].i>=minSpacing){ taps.unshift(pts[i]); }
-    if(taps.length>=minTaps) break;
+    if(taps.length===0){taps.unshift(pts[i]);}
+    else if(taps[0].i-pts[i].i>=minSpacing){taps.unshift(pts[i]);}
+    if(taps.length>=maxTaps)break;
   }
   return taps.length>=minTaps?taps:null;
 }
 
-function slopeOk(slope,atr){ const a=Math.abs(slope); return a>atr*0.03&&a<atr*0.5; }
+function slopeOk(slope,atr){const a=Math.abs(slope);return a>atr*0.03&&a<atr*0.5;}
 
-function priorBreakExists(candles,tl,trend){
-  let crossings=0;
-  const from=Math.max(0,candles.length-25);
+function countPriorBreaks(candles,tl,trend){
+  let breaks=0,wasBelow=false,init=false;
+  const from=Math.max(0,candles.length-60);
   for(let i=from;i<candles.length-1;i++){
     const lv=tl.slope*i+tl.intercept;
-    if(trend==='up'?candles[i].c>lv:candles[i].c<lv) crossings++;
+    const beyond=trend==='up'?candles[i].c>lv:candles[i].c<lv;
+    if(!init){wasBelow=!beyond;init=true;continue;}
+    if(beyond&&wasBelow){breaks++;wasBelow=false;}
+    else if(!beyond){wasBelow=true;}
   }
-  return crossings>3;
+  return breaks;
 }
 
-// Main analysis
+function pullbacksControlled(candles,highs,lows,trend){
+  if(highs.length<2||lows.length<2)return false;
+  const swings=trend==='up'?lows.slice(-2).map(l=>l.i):highs.slice(-2).map(h=>h.i);
+  if(swings.length<2)return true;
+  const pb=candles.slice(swings[0],swings[1]+1);
+  const avgPB=pb.reduce((a,c)=>a+(c.h-c.l),0)/(pb.length||1);
+  const avgATR=candles.slice(-20).reduce((a,c)=>a+(c.h-c.l),0)/20;
+  return avgPB<avgATR*1.5;
+}
+
+function clearPath(entry,target,highs,lows,trend){
+  const obs=trend==='up'?highs.filter(h=>h.price>entry&&h.price<target):lows.filter(l=>l.price<entry&&l.price>target);
+  return obs.length<=1;
+}
+
 function analyzePair(symbol,candles){
-  const steps=[];
-  let overallPass=true;
+  const steps=[]; let overallPass=true;
   const fail=(label,detail)=>{steps.push({label,detail,pass:false});overallPass=false;};
   const pass=(label,detail)=>steps.push({label,detail,pass:true});
 
-  if(candles.length<90){
-    return{symbol,overallPass:false,steps:[{label:'Insufficient data',detail:`Only ${candles.length} candles`,pass:false}],tradeData:null};
-  }
+  if(candles.length<60){return{symbol,overallPass:false,steps:[{label:'Insufficient data',detail:`Only ${candles.length} candles`,pass:false}],tradeData:null};}
 
   const atrSeries=calcATR(candles,14);
   const lastATR=atrSeries[atrSeries.length-1];
@@ -217,132 +204,109 @@ function analyzePair(symbol,candles){
   if(highs.length>=2&&lows.length>=2){
     const h1=highs[highs.length-2],h2=highs[highs.length-1];
     const l1=lows[lows.length-2],l2=lows[lows.length-1];
-    if(h2.price>h1.price&&l2.price>l1.price) trend='up';
-    else if(h2.price<h1.price&&l2.price<l1.price) trend='down';
+    if(h2.price>h1.price&&l2.price>l1.price)trend='up';
+    else if(h2.price<h1.price&&l2.price<l1.price)trend='down';
   }
-  if(!trend){ fail('Market environment','No clean HH/HL or LH/LL — choppy or ranging.'); }
-  else{ pass('Market environment',`Clear ${trend==='up'?'uptrend (HH/HL)':'downtrend (LH/LL)'} confirmed.`); }
+  if(!trend){fail('Step 1 — Market environment','No clean HH/HL or LH/LL structure — choppy or ranging.');}
+  else{
+    const controlled=pullbacksControlled(candles,highs,lows,trend);
+    if(!controlled){fail('Step 1 — Pullbacks','Pullbacks appear chaotic or too large — market not clean enough.');}
+    else{pass('Step 1 — Market environment',`Clear ${trend==='up'?'uptrend (HH/HL)':'downtrend (LH/LL)'} with controlled pullbacks. ✓`);}
+  }
 
-  // Step 2: 3 taps, 6+ candle spacing, 3+ weeks
+  // Step 2: Trendline 2–3 taps, moderate angle, max 1 prior break
   const H4W=30;
   let trendline=null,taps=null;
   if(trend){
     const pool=trend==='up'?lows:highs;
-    taps=findValidTaps(pool,6,3);
-    if(!taps){
-      fail('Trendline (3 taps)','Fewer than 3 taps with 6+ candle spacing — trendline not yet confirmed.');
-    } else {
+    taps=findValidTaps(pool,4,2,3);
+    if(!taps){fail('Step 2 — Trendline','Fewer than 2 clean swing points — trendline not drawable.');}
+    else{
       const span=taps[taps.length-1].i-taps[0].i;
       const weeks=(span/H4W).toFixed(1);
-      if(span<3*H4W){
-        fail('Trendline (3 weeks)',`Spans only ≈${weeks} weeks — Tori requires 3+ weeks from first tap to break.`);
-      } else {
+      if(span<H4W){fail('Step 2 — Trendline span',`Only ≈${weeks} weeks of data — needs ≥1 week.`);}
+      else{
         trendline=linReg(taps);
         if(!slopeOk(Math.abs(trendline.slope),lastATR)){
-          fail('Trendline (slope)',Math.abs(trendline.slope)>=lastATR*0.5?'Too steep (>45°).':'Too flat — barely a trend.');
+          fail('Step 2 — Trendline angle',Math.abs(trendline.slope)>=lastATR*0.5?'Angle too steep (>45°).':'Angle too flat — not a meaningful trend.');
           trendline=null;
         } else {
-          pass('Trendline quality',`${taps.length} taps, 6+ candles apart, ≈${weeks} weeks, moderate slope. ✓`);
+          const pb=countPriorBreaks(candles,trendline,trend);
+          if(pb>1){fail('Step 2 — Prior breaks',`${pb} prior failed breaks on this line — max 1 allowed.`);trendline=null;}
+          else{pass('Step 2 — Trendline',`${taps.length} taps, ≈${weeks} weeks, moderate angle${pb===1?', 1 prior failed break (allowed)':''}. ✓`);}
         }
       }
     }
-  } else { fail('Trendline quality','Skipped — no trend.'); }
+  } else {fail('Step 2 — Trendline','Skipped — no trend.');}
 
-  // Step 3: One trade per trendline
-  if(trendline){
-    if(priorBreakExists(candles,trendline,trend)){
-      fail('One trade per trendline','Prior break detected in last 20 candles — skip, only one attempt per line.');
-      trendline=null;
-    } else {
-      pass('One trade per trendline','No prior break — first attempt on this line. ✓');
-    }
-  }
-
-  // Step 4: Compression
+  // Step 3: Compression
   let compressionOk=false;
   if(trendline){
     const li=candles.length-1;
     const lv=trendline.slope*li+trendline.intercept;
     const dist=Math.abs(candles[li].c-lv);
-    const atrR=atrSeries.slice(-5).reduce((a,b)=>a+b,0)/5;
-    const atrP=atrSeries.slice(-20,-5).reduce((a,b)=>a+b,0)/15;
-    const contracting=atrR<atrP*0.92;
-    const close=dist<lastATR*0.8;
-    compressionOk=contracting&&close;
-    if(compressionOk){ pass('Compression',`Volatility contracting and price close to the line. ✓`); }
-    else{ fail('Compression',!contracting?'No volatility contraction into the line.':'Price too far from trendline for low-risk entry.'); }
-  } else if(trend){ fail('Compression','Skipped — no valid trendline.'); }
+    const recentR=candles.slice(-5).map(c=>c.h-c.l);
+    const priorR=candles.slice(-15,-5).map(c=>c.h-c.l);
+    const avgRecent=recentR.reduce((a,b)=>a+b,0)/recentR.length;
+    const avgPrior=priorR.reduce((a,b)=>a+b,0)/priorR.length;
+    const contracting=avgRecent<avgPrior*0.98;
+    const closeToLine=dist<lastATR*1.2;
+    compressionOk=contracting&&closeToLine;
+    if(compressionOk){pass('Step 3 — Compression','Candles compressing (shrinking ranges) into the trendline. ✓');}
+    else{fail('Step 3 — Compression',!contracting?'No candle compression — ranges not shrinking.':'Price too far from trendline for a low-risk entry.');}
+  } else if(trend){fail('Step 3 — Compression','Skipped — no valid trendline.');}
 
-  // Step 5: Break confirmation
+  // Step 4: Break confirmation
   let breakOk=false,breakCandle=null;
   if(trendline){
     const last=candles[candles.length-1];
-    const lv=trendline.slope*(candles.length-1)+trendline.intercept;
-    const body=Math.abs(last.c-last.o);
-    const range=last.h-last.l||1e-9;
+    const tlv=trendline.slope*(candles.length-1)+trendline.intercept;
+    const body=Math.abs(last.c-last.o),range=last.h-last.l||1e-9;
     const bodyRatio=body/range;
-    const beyond=trend==='up'?last.c>lv:last.c<lv;
+    const beyond=trend==='up'?last.c>tlv:last.c<tlv;
     breakOk=beyond&&bodyRatio>0.55;
     breakCandle=last;
-    if(breakOk){ pass('Break confirmation',`H4 close ${trend==='up'?'above':'below'} trendline, ${(bodyRatio*100).toFixed(0)}% body. ✓`); }
-    else{ fail('Break confirmation',!beyond?'Price has not closed beyond the trendline yet.':'Wick-heavy candle — not a valid break close.'); }
-  } else if(trend){ fail('Break confirmation','Skipped — no valid trendline.'); }
+    if(breakOk){pass('Step 4 — Break confirmation',`H4 close ${trend==='up'?'above':'below'} trendline with ${(bodyRatio*100).toFixed(0)}% body dominance. ✓`);}
+    else{fail('Step 4 — Break confirmation',!beyond?'Price has not closed beyond the trendline yet — wait.':'Wick-heavy candle close — not a valid break (body <55%).');}
+  } else if(trend){fail('Step 4 — Break confirmation','Skipped — no valid trendline.');}
 
-  // Step 6: Safety line + R:R
+  // Step 5: Entry, stop, target, R
   let tradeData=null;
   if(breakOk&&compressionOk){
-    const oppPool=trend==='up'?highs:lows;
-    const oppTaps=findValidTaps(oppPool,4,2)||oppPool.slice(-2);
-    const safetyLine=oppTaps&&oppTaps.length>=2?linReg(oppTaps):null;
     const entry=breakCandle.c;
     const li=candles.length-1;
     const tlv=trendline.slope*li+trendline.intercept;
-
-    let stop;
+    const oppPool=trend==='up'?highs:lows;
+    const oppTaps=findValidTaps(oppPool,4,2,3)||oppPool.slice(-2);
+    const safetyLine=oppTaps&&oppTaps.length>=2?linReg(oppTaps):null;
+    let stop,stopNote;
     if(safetyLine){
       const sv=safetyLine.slope*(li+4)+safetyLine.intercept;
       const valid=trend==='up'?sv<entry:sv>entry;
       stop=valid?sv:(trend==='up'?tlv-lastATR*0.5:tlv+lastATR*0.5);
+      stopNote=valid?'Safety line (opposing trendline) projected 4 candles ahead':'ATR fallback — no valid safety line';
     } else {
       stop=trend==='up'?tlv-lastATR*0.5:tlv+lastATR*0.5;
+      stopNote='ATR-based stop beyond trendline (no opposing trendline found)';
     }
-
     const riskDist=Math.abs(entry-stop);
-    if(riskDist===0){ fail('R:R','Risk distance is zero — skip.'); }
-    else {
+    if(riskDist===0){fail('Step 5 — R:R','Risk distance is zero — skip.');}
+    else{
       let target;
-      if(trend==='up'){
-        const fh=highs.filter(h=>h.price>entry);
-        target=fh.length?Math.min(...fh.map(h=>h.price)):entry+riskDist*2.5;
-      } else {
-        const fl=lows.filter(l=>l.price<entry);
-        target=fl.length?Math.max(...fl.map(l=>l.price)):entry-riskDist*2.5;
-      }
-      const reward=Math.abs(target-entry);
-      const rMultiple=reward/riskDist;
-
-      // Liquidity sweep
-      let sweep=false;
-      if(trend==='up'&&lows.length>=2){
-        const pr=lows[lows.length-2];
-        sweep=candles.slice(pr.i+1,pr.i+8).some(c=>c.l<pr.price&&c.c>pr.price);
-      } else if(trend==='down'&&highs.length>=2){
-        const pr=highs[highs.length-2];
-        sweep=candles.slice(pr.i+1,pr.i+8).some(c=>c.h>pr.price&&c.c<pr.price);
-      }
-
-      tradeData={
-        direction:trend==='up'?'Long':'Short',
-        entry,stop,target,rMultiple,
-        setupType:`${taps.length}-tap trendline break${sweep?' + liquidity sweep':''}`,
-        stopNote:safetyLine?'Safety line (opposing trendline) projected 4 candles ahead':'ATR fallback (no opposing trendline found)',
-      };
-
-      if(rMultiple<2){
-        fail('R:R to next structure',`Only ≈${rMultiple.toFixed(1)}R to next S/R — below 2R minimum.`);
-        tradeData=null;
-      } else {
-        pass('R:R to next structure',`≈${rMultiple.toFixed(1)}R to nearest S/R. ✓`);
+      if(trend==='up'){const fh=highs.filter(h=>h.price>entry);target=fh.length?Math.min(...fh.map(h=>h.price)):entry+riskDist*2.5;}
+      else{const fl=lows.filter(l=>l.price<entry);target=fl.length?Math.max(...fl.map(l=>l.price)):entry-riskDist*2.5;}
+      const rMultiple=Math.abs(target-entry)/riskDist;
+      const pathClear=clearPath(entry,target,highs,lows,trend);
+      if(rMultiple<2){fail('Step 3 — R:R',`Only ≈${rMultiple.toFixed(1)}R to next structure — minimum is 2–2.5R.`);}
+      else if(!pathClear){fail('Step 1 — Path to target','2+ S/R levels in trade path — not a clear run to target.');}
+      else{
+        pass('Step 5 — Entry & R:R',`≈${rMultiple.toFixed(1)}R to next structure, clear path. ✓`);
+        let sweep=false;
+        if(trend==='up'&&lows.length>=2){const pr=lows[lows.length-2];sweep=candles.slice(pr.i+1,pr.i+8).some(c=>c.l<pr.price&&c.c>pr.price);}
+        else if(trend==='down'&&highs.length>=2){const pr=highs[highs.length-2];sweep=candles.slice(pr.i+1,pr.i+8).some(c=>c.h>pr.price&&c.c<pr.price);}
+        const dec=symbol.includes('JPY')?3:5;
+        tradeData={direction:trend==='up'?'Long':'Short',entry,stop,target,rMultiple,stopNote,sweep,
+          setupType:`${taps.length}-tap trendline break${sweep?' + liquidity sweep':''}`};
       }
     }
   }
@@ -350,22 +314,13 @@ function analyzePair(symbol,candles){
   return{symbol,overallPass:overallPass&&!!tradeData,steps,tradeData,trend};
 }
 
-function fmt(symbol,v){
-  if(v==null) return '—';
-  return v.toFixed(symbol.includes('JPY')?3:5);
-}
+function fmt(symbol,v){if(v==null)return'—';return v.toFixed(symbol.includes('JPY')?3:5);}
 
 function renderCard(result,accountSize,riskPct){
-  const card=document.createElement('div');
-  card.className='card';
+  const card=document.createElement('div');card.className='card';
   const vc=result.tradeData?'yes':'no';
   const vt=result.tradeData?'✅ Trade exists':'❌ No trade';
-  const stepsHtml=result.steps.map(s=>`
-    <div class="step ${s.pass?'pass':'fail'}">
-      <span class="mark">${s.pass?'✓':'✕'}</span>
-      <span><span class="label">${s.label}.</span> <span class="detail">${s.detail}</span></span>
-    </div>`).join('');
-
+  const stepsHtml=result.steps.map(s=>`<div class="step ${s.pass?'pass':'fail'}"><span class="mark">${s.pass?'✓':'✕'}</span><span><strong>${s.label}.</strong> <span class="detail">${s.detail}</span></span></div>`).join('');
   let tradeHtml='';
   if(result.tradeData){
     const t=result.tradeData;
@@ -380,49 +335,41 @@ function renderCard(result,accountSize,riskPct){
            <div class="row2"><span class="k">Stop distance</span><span class="v">${spips.toFixed(0)} pips</span></div>
            <div class="row2"><span class="k">Position size (approx)</span><span class="v">${Math.round(units).toLocaleString()} units</span></div>`;
     }
-    tradeHtml=`
-      <div class="trade-summary">
-        <div class="row2"><span class="k">Direction</span><span class="v">${t.direction}</span></div>
-        <div class="row2"><span class="k">Setup</span><span class="v">${t.setupType}</span></div>
-        <div class="row2"><span class="k">Stop basis</span><span class="v">${t.stopNote}</span></div>
-        <div class="row2"><span class="k">Entry (approx)</span><span class="v">${fmt(result.symbol,t.entry)}</span></div>
-        <div class="row2"><span class="k">Stop</span><span class="v">${fmt(result.symbol,t.stop)}</span></div>
-        <div class="row2"><span class="k">Target</span><span class="v">${fmt(result.symbol,t.target)}</span></div>
-        <div class="row2"><span class="k">R potential</span><span class="v">${t.rMultiple.toFixed(1)}R</span></div>
-        ${pos}
-      </div>
-      <div class="manual-block">
-        <div class="panel-title">Your judgment calls</div>
-        <div class="checklist">
-          <label><input type="checkbox"> No high-impact news for ${result.symbol} in next 1–2h (<a class="helper-link" href="https://www.forexfactory.com/calendar" target="_blank">ForexFactory</a>)</label>
-          <label><input type="checkbox"> Setup looks clean on chart — not forced or zoomed in to find</label>
-          <label><input type="checkbox"> Not late Friday with stop far from price</label>
-        </div>
-      </div>`;
-  }
-
-  card.innerHTML=`
-    <div class="card-head">
-      <span class="pair">${result.symbol}</span>
-      <span class="verdict ${vc}">${vt}</span>
+    tradeHtml=`<div class="trade-summary">
+      <div class="row2"><span class="k">Direction</span><span class="v">${t.direction}</span></div>
+      <div class="row2"><span class="k">Setup</span><span class="v">${t.setupType}</span></div>
+      <div class="row2"><span class="k">Entry logic</span><span class="v">Continuation — watch for retest before filling</span></div>
+      <div class="row2"><span class="k">Stop basis</span><span class="v">${t.stopNote}</span></div>
+      <div class="row2"><span class="k">Entry (approx)</span><span class="v">${fmt(result.symbol,t.entry)}</span></div>
+      <div class="row2"><span class="k">Stop</span><span class="v">${fmt(result.symbol,t.stop)}</span></div>
+      <div class="row2"><span class="k">Target</span><span class="v">${fmt(result.symbol,t.target)}</span></div>
+      <div class="row2"><span class="k">R potential</span><span class="v">${t.rMultiple.toFixed(1)}R</span></div>
+      <div class="row2"><span class="k">Liquidity sweep</span><span class="v">${t.sweep?'✓ Detected':'⚠️ Not detected — verify manually'}</span></div>
+      ${pos}
     </div>
-    <div class="card-body">
-      <div class="steps">${stepsHtml}</div>
-      ${tradeHtml}
+    <div class="manual-block">
+      <div class="panel-title">Your judgment calls (Step 0 + Step 7)</div>
+      <div class="checklist">
+        <label><input type="checkbox"> No high-impact news for ${result.symbol} in next 1–2h (<a class="helper-link" href="https://www.forexfactory.com/calendar" target="_blank">ForexFactory</a>)</label>
+        <label><input type="checkbox"> Price swept liquidity before this move (not from middle of range)</label>
+        <label><input type="checkbox"> Setup looks obvious on chart — not forced or zoomed in to find</label>
+        <label><input type="checkbox"> Not late Friday with stop far from price</label>
+      </div>
     </div>`;
+  }
+  card.innerHTML=`<div class="card-head"><span class="pair">${result.symbol}</span><span class="verdict ${vc}">${vt}</span></div>
+    <div class="card-body"><div class="steps">${stepsHtml}</div>${tradeHtml}</div>`;
   return card;
 }
 
 scanBtn.addEventListener('click',async()=>{
   const apiKey=apiKeyInput.value.trim();
-  if(!apiKey){ scanStatus.textContent='Add your Twelve Data API key first.'; scanStatus.className='status-line err'; return; }
+  if(!apiKey){scanStatus.textContent='Add your Twelve Data API key first.';scanStatus.className='status-line err';return;}
   const accountSize=parseFloat(document.getElementById('accountSize').value)||null;
   const riskPct=parseFloat(document.getElementById('riskPct').value)||null;
-
   scanBtn.disabled=true;
-  resultsEl.innerHTML='<div class="loading">Pulling H4 candles and checking all rules…</div>';
+  resultsEl.innerHTML='<div class="loading">Pulling H4 candles — checking all steps…</div>';
   scanStatus.textContent='';
-
   const cards=[];
   for(const symbol of PAIRS){
     try{
@@ -430,14 +377,12 @@ scanBtn.addEventListener('click',async()=>{
       const result=analyzePair(symbol,candles);
       cards.push(renderCard(result,accountSize,riskPct));
     }catch(e){
-      const ec=document.createElement('div');
-      ec.className='card';
+      const ec=document.createElement('div');ec.className='card';
       ec.innerHTML=`<div class="card-head"><span class="pair">${symbol}</span><span class="verdict pending">⚠ error</span></div><div class="err-box">${e.message}</div>`;
       cards.push(ec);
     }
     await new Promise(r=>setTimeout(r,900));
   }
-
   resultsEl.innerHTML='';
   cards.forEach(c=>resultsEl.appendChild(c));
   scanBtn.disabled=false;
