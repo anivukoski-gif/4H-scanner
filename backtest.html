@@ -1,124 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Spiraled — Backtest Results</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiraled — Backtest</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap');
-  :root{--cream:#F4EFE6;--paper:#FBF8F2;--ink:#2E2A24;--terra:#B5654A;--sage:#5F7A52;--line:#DCD3C2;--muted:#8C8475;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;padding:32px 20px 80px;}
-  .wrap{max-width:900px;margin:0 auto;}
-  h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-bottom:4px;}
-  .meta{font-size:12px;color:var(--muted);margin-bottom:32px;letter-spacing:.04em;}
-  h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;margin:32px 0 14px;}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
-  .stat{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px 16px;}
-  .stat .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;}
-  .stat .value{font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:600;}
-  .stat .value.pos{color:var(--sage);}
-  .stat .value.neg{color:var(--terra);}
-  .chart-wrap{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:20px;margin-bottom:20px;}
-  .chart-wrap canvas{max-height:220px;}
-  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--paper);border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-bottom:8px;}
-  th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);font-weight:400;}
-  td{padding:9px 12px;border-bottom:1px solid var(--line);}
-  tr:last-child td{border-bottom:none;}
-  .win{color:var(--sage);font-weight:500;}
-  .loss{color:var(--terra);font-weight:500;}
-  .timeout{color:var(--muted);}
-  .pair-section{margin-bottom:48px;}
-  .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:10px;font-weight:500;margin-left:8px;vertical-align:middle;}
-  .tag.pos{background:rgba(95,122,82,.12);color:var(--sage);}
-  .tag.neg{background:rgba(181,101,74,.12);color:var(--terra);}
-  .rules{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px 18px;margin-bottom:28px;font-size:12.5px;color:var(--muted);line-height:1.8;}
-  .rules strong{color:var(--ink);font-weight:500;}
-  footer{margin-top:40px;font-size:11px;color:var(--muted);text-align:center;line-height:1.8;}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap');
+:root{--cream:#F4EFE6;--paper:#FBF8F2;--ink:#2E2A24;--terra:#B5654A;--sage:#5F7A52;--line:#DCD3C2;--muted:#8C8475;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;padding:32px 20px 80px;}
+.wrap{max-width:920px;margin:0 auto;}
+h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-bottom:4px;}
+.meta{font-size:12px;color:var(--muted);margin-bottom:28px;}
+h2{font-family:'Cormorant Garamond',serif;font-size:22px;margin:32px 0 14px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:12px 14px;}
+.stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px;}
+.stat .val{font-size:22px;font-family:'Cormorant Garamond',serif;font-weight:600;}
+.pos{color:var(--sage);}.neg{color:var(--terra);}
+.chart-box{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:18px;margin-bottom:18px;}
+.chart-box canvas{max-height:200px;}
+.rules{background:var(--paper);border:1px solid var(--line);padding:12px 16px;border-radius:2px;font-size:12px;color:var(--muted);line-height:1.9;margin-bottom:24px;}
+.rules strong{color:var(--ink);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:2px;margin-bottom:6px;}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);font-weight:400;}
+td{padding:8px 11px;border-bottom:1px solid var(--line);}
+tr:last-child td{border-bottom:none;}
+.win{color:var(--sage);font-weight:500;}.loss{color:var(--terra);font-weight:500;}.timeout{color:var(--muted);}
+.pair-section{margin-bottom:44px;}
+.badge{display:inline-block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:10px;font-weight:500;margin-left:8px;vertical-align:middle;}
+.badge.pos{background:rgba(95,122,82,.12);color:var(--sage);}
+.badge.neg{background:rgba(181,101,74,.12);color:var(--terra);}
+.expectancy{margin:12px 0 20px;padding:14px 18px;border-radius:2px;font-size:13.5px;font-weight:500;}
+.expectancy.pos{background:rgba(95,122,82,.1);border:1px solid rgba(95,122,82,.25);color:var(--sage);}
+.expectancy.neg{background:rgba(181,101,74,.08);border:1px solid rgba(181,101,74,.22);color:var(--terra);}
+footer{margin-top:40px;font-size:11px;color:var(--muted);text-align:center;line-height:1.8;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Backtest Results</h1>
-  <div class="meta">Spiraled H4 · Tori Trades A+ Strategy · Walk-forward, no look-ahead · 2026-07-27 14:35 UTC</div>
+<h1>Backtest Results</h1>
+<div class="meta">Spiraled H4 · Tori Trades A+ · Walk-forward, no look-ahead · 2026-07-28 18:39 UTC</div>
 
-  <div class="rules">
-    <strong>Rules applied:</strong> H4 trend (HH/HL or LH/LL) · Controlled pullbacks · 2–3 tap trendline · Moderate slope · ≥1 week span · Max 1 prior failed break · Candle compression · Strong body break (>55%) · Safety line stop · 2R+ to next S/R · Clear path to target
-  </div>
+<div class="rules">
+  <strong>Rules applied:</strong> H4 trend (HH/HL or LH/LL) &nbsp;·&nbsp; 2–3 tap trendline &nbsp;·&nbsp; ≥1 week span &nbsp;·&nbsp; Moderate slope &nbsp;·&nbsp; Max 1 prior failed break &nbsp;·&nbsp; Price within 1.5×ATR of line &nbsp;·&nbsp; Body-dominant close >55% &nbsp;·&nbsp; Safety line stop &nbsp;·&nbsp; ≥2R to next structure<br>
+  <strong>Visual judgment calls excluded (manual):</strong> Controlled pullbacks · Clear path to target · News filter · Liquidity sweep quality
+</div>
 
-  <h2>Combined — All Pairs</h2>
-  
-  <div class="cards">
-    <div class="stat"><div class="label">Total trades</div><div class="value">1</div></div>
-    <div class="stat"><div class="label">Win rate</div><div class="value pos">100.0%</div></div>
-    <div class="stat"><div class="label">Total R</div><div class="value pos">2.50R</div></div>
-    <div class="stat"><div class="label">Avg R / trade</div><div class="value pos">2.50R</div></div>
-    <div class="stat"><div class="label">Avg win</div><div class="value pos">2.50R</div></div>
-    <div class="stat"><div class="label">Avg loss</div><div class="value neg">N/AR</div></div>
-    <div class="stat"><div class="label">Max drawdown</div><div class="value neg">0.00R</div></div>
-    <div class="stat"><div class="label">Max consec. losses</div><div class="value">0</div></div>
-  </div>
-  <div class="chart-wrap">
-    <canvas id="equityCombined"></canvas>
-  </div>
+<h2>Combined — All Pairs</h2>
 
-  <div class="pair-section"><h2>EUR/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-14 → 2026-07-27).</p></div><div class="pair-section"><h2>GBP/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-16 → 2026-07-27).</p></div><div class="pair-section"><h2>USD/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-09 → 2026-07-27).</p></div><div class="pair-section">
-      <h2>EUR/JPY<span class="tag pos">+2.5R</span></h2>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">5000 candles · 2023-08-15 → 2026-07-27</div>
-      <div class="cards">
-        <div class="stat"><div class="label">Trades</div><div class="value">1</div></div>
-        <div class="stat"><div class="label">Win rate</div><div class="value pos">100.0%</div></div>
-        <div class="stat"><div class="label">Total R</div><div class="value pos">2.50R</div></div>
-        <div class="stat"><div class="label">Avg R</div><div class="value pos">2.50R</div></div>
-        <div class="stat"><div class="label">Max DD</div><div class="value neg">0.00R</div></div>
-        <div class="stat"><div class="label">Max consec. L</div><div class="value">0</div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="equity_EUR_JPY"></canvas></div>
-      <table>
-        <thead><tr><th>Entry date</th><th>Exit date</th><th>Direction</th><th>Outcome</th><th>Actual R</th><th>Target R</th></tr></thead>
-        <tbody><tr>
-          <td>2025-11-17</td><td>2025-11-20</td><td>Long</td>
-          <td class="win">✓ Win</td>
-          <td class="win">+2.5R</td>
-          <td>2.5R</td>
-        </tr></tbody>
-      </table>
-    </div><div class="pair-section"><h2>GBP/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-15 → 2026-07-27).</p></div>
+<div class="cards">
+  <div class="stat"><div class="lbl">Total trades</div><div class="val">1</div></div>
+  <div class="stat"><div class="lbl">Win rate</div><div class="val pos">100.0%</div></div>
+  <div class="stat"><div class="lbl">Total R</div><div class="val pos">2.50R</div></div>
+  <div class="stat"><div class="lbl">Avg R / trade</div><div class="val pos">2.50R</div></div>
+  <div class="stat"><div class="lbl">Avg win</div><div class="val pos">2.50R</div></div>
+  <div class="stat"><div class="lbl">Avg loss</div><div class="val neg">N/AR</div></div>
+  <div class="stat"><div class="lbl">Max drawdown</div><div class="val neg">0.00R</div></div>
+  <div class="stat"><div class="lbl">Max consec. L</div><div class="val">0</div></div>
+</div>
+<div class="expectancy pos">
+  ✅ Positive expectancy — strategy has edge over this period.
+  &nbsp; Avg 2.50R per trade across 1 signals.
+</div>
+<div class="chart-box"><canvas id="eqAll"></canvas></div>
 
-  <footer>Walk-forward backtest — only data available at entry time used per signal.<br>Past results do not guarantee future performance. Always verify setups visually and check news before trading.</footer>
+
+<div class="pair-section"><h2>EUR/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-15 → 2026-07-29).</p></div><div class="pair-section"><h2>GBP/USD</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-17 → 2026-07-29).</p></div><div class="pair-section"><h2>USD/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-10 → 2026-07-29).</p></div><div class="pair-section">
+    <h2>EUR/JPY<span class="badge pos">+2.5R</span></h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">5000 candles · 2023-08-16 → 2026-07-29</div>
+    <div class="cards">
+      <div class="stat"><div class="lbl">Trades</div><div class="val">1</div></div>
+      <div class="stat"><div class="lbl">Win rate</div><div class="val pos">100.0%</div></div>
+      <div class="stat"><div class="lbl">Total R</div><div class="val pos">2.50R</div></div>
+      <div class="stat"><div class="lbl">Avg R</div><div class="val pos">2.50R</div></div>
+      <div class="stat"><div class="lbl">Max DD</div><div class="val neg">0.00R</div></div>
+      <div class="stat"><div class="lbl">Consec. L</div><div class="val">0</div></div>
+    </div>
+    <div class="chart-box"><canvas id="eq_EUR_JPY"></canvas></div>
+    <table>
+      <thead><tr><th>Entry</th><th>Exit</th><th>Dir</th><th>Outcome</th><th>Actual R</th><th>Target R</th></tr></thead>
+      <tbody><tr>
+        <td>2025-11-17</td><td>2025-11-20</td><td>Long</td>
+        <td class="win">✓ Win</td>
+        <td class="win">+2.5R</td>
+        <td>2.5R</td>
+      </tr></tbody>
+    </table>
+  </div><div class="pair-section"><h2>GBP/JPY</h2><p style="color:var(--muted);font-size:13px;">No trades generated (5000 candles · 2023-08-16 → 2026-07-29).</p></div>
+
+<footer>Walk-forward backtest — signal detection uses only data available at each entry point in time.<br>Past results do not guarantee future performance. Always verify setups visually and check news before trading.</footer>
 </div>
 <script>
-function drawEquity(id,equity,label){
-  const ctx=document.getElementById(id);
-  if(!ctx)return;
-  const final=parseFloat(equity[equity.length-1]);
-  new Chart(ctx,{
-    type:'line',
-    data:{
-      labels:equity.map((_,i)=>i===0?'Start':'#'+i),
-      datasets:[{
-        label,data:equity,
-        borderColor:final>=0?'#5F7A52':'#B5654A',
-        borderWidth:2,
-        pointRadius:equity.length>50?0:3,
-        fill:true,
-        backgroundColor:final>=0?'rgba(95,122,82,0.07)':'rgba(181,101,74,0.07)',
-        tension:0.3
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'R'}}},
-      scales:{
-        x:{display:false},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>v+'R',font:{family:'Jost',size:11}}}
-      }
-    }
+function drawEq(id,eq,label){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  const final=parseFloat(eq[eq.length-1]);
+  new Chart(ctx,{type:'line',data:{
+    labels:eq.map((_,i)=>i===0?'Start':'#'+i),
+    datasets:[{label,data:eq,borderColor:final>=0?'#5F7A52':'#B5654A',borderWidth:2,
+      pointRadius:eq.length>60?0:3,fill:true,
+      backgroundColor:final>=0?'rgba(95,122,82,0.07)':'rgba(181,101,74,0.07)',tension:0.3}]
+  },options:{responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'R'}}},
+    scales:{x:{display:false},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>v+'R',font:{family:'Jost',size:11}}}}}
   });
 }
-drawEquity('equityCombined',[0,2.5],'All pairs');
-drawEquity('equity_EUR_JPY',[0,2.5],'EUR/JPY');
+drawEq('eqAll',[0,2.5],'All pairs');
+drawEq('eq_EUR_JPY',[0,2.5],'EUR/JPY');
 </script>
-</body>
-</html>
+</body></html>
