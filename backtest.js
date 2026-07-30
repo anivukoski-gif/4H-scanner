@@ -3,8 +3,8 @@ const fs = require('fs');
 
 const PAIRS = ["EUR/USD","GBP/USD","USD/JPY","EUR/JPY","GBP/JPY"];
 const API_KEY = process.env.TWELVEDATA_KEY;
-const MAX_HOLD = 60;   // ~10 trading days on H4
-const COOLDOWN = 15;   // candles between trades on same pair
+const MAX_HOLD = 60;
+const COOLDOWN = 15;
 
 function get(url){
   return new Promise((resolve,reject)=>{
@@ -13,7 +13,7 @@ function get(url){
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-// ── Shared analysis logic (Tori Trades A+ — calibrated) ─────────────────────
+// ── Shared core logic — Tori Trades A+ (sequential compression → break) ──────
 
 function calcATR(candles, period) {
   const trs=[];
@@ -29,7 +29,7 @@ function calcATR(candles, period) {
   return out;
 }
 
-function findPivots(candles,lookback=3){
+function findPivots(candles, lookback=3) {
   const highs=[],lows=[];
   for(let i=lookback;i<candles.length-lookback;i++){
     const w=candles.slice(i-lookback,i+lookback+1),c=candles[i];
@@ -39,15 +39,14 @@ function findPivots(candles,lookback=3){
   return{highs,lows};
 }
 
-function linReg(pts){
+function linReg(pts) {
   const n=pts.length,sx=pts.reduce((a,p)=>a+p.i,0),sy=pts.reduce((a,p)=>a+p.price,0);
   const sxy=pts.reduce((a,p)=>a+p.i*p.price,0),sxx=pts.reduce((a,p)=>a+p.i*p.i,0);
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx||1);
   return{slope,intercept:(sy-slope*sx)/n};
 }
 
-// 2–3 clean taps with minimum spacing between each
-function findValidTaps(pts,minSpacing=4,minTaps=2,maxTaps=3){
+function findValidTaps(pts, minSpacing=4, minTaps=2, maxTaps=3) {
   const taps=[];
   for(let i=pts.length-1;i>=0;i--){
     if(taps.length===0){taps.unshift(pts[i]);}
@@ -57,14 +56,12 @@ function findValidTaps(pts,minSpacing=4,minTaps=2,maxTaps=3){
   return taps.length>=minTaps?taps:null;
 }
 
-// Moderate slope — not flat, not steep (visual <45°)
-function slopeOk(slope,atr){
+function slopeOk(slope, atr) {
   const a=Math.abs(slope);
-  return a>atr*0.02&&a<atr*0.6;
+  return a>atr*0.02 && a<atr*0.6;
 }
 
-// Count how many times price crossed back through the trendline
-function countPriorBreaks(candles,tl,trend){
+function countPriorBreaks(candles, tl, trend) {
   let breaks=0,wasBelow=false,init=false;
   const from=Math.max(0,candles.length-80);
   for(let i=from;i<candles.length-1;i++){
@@ -77,8 +74,7 @@ function countPriorBreaks(candles,tl,trend){
   return breaks;
 }
 
-// Detect liquidity sweep
-function detectSweep(candles,highs,lows,trend){
+function detectSweep(candles, highs, lows, trend) {
   if(trend==='up'&&lows.length>=2){
     const pr=lows[lows.length-2];
     return candles.slice(Math.max(0,pr.i+1),pr.i+10).some(c=>c.l<pr.price&&c.c>pr.price);
@@ -90,55 +86,85 @@ function detectSweep(candles,highs,lows,trend){
   return false;
 }
 
-// Core signal detection — used by both scanner and backtest
-function detectSignal(candles){
-  if(candles.length<60)return null;
-
-  const atrSeries=calcATR(candles,14);
+// Build trendline context — used by both compression check and break check
+function buildTrendlineContext(candles, atrSeries) {
+  if(candles.length<60) return null;
   const lastATR=atrSeries[atrSeries.length-1];
   const{highs,lows}=findPivots(candles,3);
+  const H4W=30;
 
-  // STEP 1: Clear trend — HH/HL or LH/LL
+  // Step 1: trend
   let trend=null;
   if(highs.length>=2&&lows.length>=2){
     const h1=highs[highs.length-2],h2=highs[highs.length-1];
     const l1=lows[lows.length-2],l2=lows[lows.length-1];
-    if(h2.price>h1.price&&l2.price>l1.price)trend='up';
-    else if(h2.price<h1.price&&l2.price<l1.price)trend='down';
+    if(h2.price>h1.price&&l2.price>l1.price) trend='up';
+    else if(h2.price<h1.price&&l2.price<l1.price) trend='down';
   }
-  if(!trend)return null;
+  if(!trend) return null;
 
-  // STEP 2: Trendline — 2–3 taps, ≥1 week, moderate slope, max 1 prior break
-  const H4W=30;
+  // Step 2: trendline
   const pool=trend==='up'?lows:highs;
   const taps=findValidTaps(pool,4,2,3);
-  if(!taps)return null;
-
+  if(!taps) return null;
   const span=taps[taps.length-1].i-taps[0].i;
-  if(span<H4W)return null; // must span at least 1 week
-
+  if(span<H4W) return null;
   const trendline=linReg(taps);
-  if(!slopeOk(Math.abs(trendline.slope),lastATR))return null;
-
+  if(!slopeOk(Math.abs(trendline.slope),lastATR)) return null;
   const priorBreaks=countPriorBreaks(candles,trendline,trend);
-  if(priorBreaks>1)return null; // max 1 failed break
+  if(priorBreaks>1) return null;
 
-  // STEP 3: Price close to trendline (compression zone)
+  return{trend,trendline,taps,span,priorBreaks,highs,lows,lastATR,H4W};
+}
+
+// PHASE A: compression — price approaching the line, setup forming
+// Returns context if setup is forming (no break yet required)
+function detectCompression(candles, atrSeries) {
+  const ctx=buildTrendlineContext(candles,atrSeries);
+  if(!ctx) return null;
+  const{trend,trendline,lastATR}=ctx;
   const li=candles.length-1;
-  const lineVal=trendline.slope*li+trendline.intercept;
-  const distToLine=Math.abs(candles[li].c-lineVal);
-  if(distToLine>lastATR*1.5)return null; // price must be near the line
+  const lv=trendline.slope*li+trendline.intercept;
+  const dist=Math.abs(candles[li].c-lv);
+  // Price must be within 2×ATR of line and on the correct side (not yet broken)
+  const onCorrectSide=trend==='up'?candles[li].c<lv:candles[li].c>lv;
+  if(!onCorrectSide) return null; // already broken — handle in phase B
+  if(dist>lastATR*2) return null;
+  return{...ctx,dist,compressionATRs:(dist/lastATR).toFixed(2)};
+}
 
-  // STEP 4: Strong body close beyond trendline
-  const last=candles[candles.length-1];
-  const tlv=trendline.slope*(candles.length-1)+trendline.intercept;
-  const body=Math.abs(last.c-last.o),range=last.h-last.l||1e-9;
-  const bodyRatio=body/range;
-  const beyond=trend==='up'?last.c>tlv:last.c<tlv;
-  if(!beyond||bodyRatio<=0.55)return null;
+// PHASE B: break — a recent candle (within last 3) closed beyond the line with body dominance
+// This separates compression phase from break phase
+function detectBreak(candles, atrSeries) {
+  const ctx=buildTrendlineContext(candles,atrSeries);
+  if(!ctx) return null;
+  const{trend,trendline,highs,lows,lastATR,taps,span,priorBreaks,H4W}=ctx;
 
-  // STEP 5: Stop, target, R:R
-  const entry=last.c;
+  // Look back up to 3 candles for the break candle
+  let breakCandle=null,breakIdx=null;
+  for(let offset=0;offset<=3;offset++){
+    const idx=candles.length-1-offset;
+    if(idx<0) break;
+    const lv=trendline.slope*idx+trendline.intercept;
+    const c=candles[idx];
+    const body=Math.abs(c.c-c.o),range=c.h-c.l||1e-9;
+    const bodyRatio=body/range;
+    const beyond=trend==='up'?c.c>lv:c.c<lv;
+    if(beyond&&bodyRatio>0.55){
+      // Also check the candle BEFORE was on the correct side (confirms it's a fresh break)
+      if(idx>0){
+        const prevLv=trendline.slope*(idx-1)+trendline.intercept;
+        const prevOnSide=trend==='up'?candles[idx-1].c<prevLv:candles[idx-1].c>prevLv;
+        if(prevOnSide){breakCandle=c;breakIdx=idx;break;}
+      }
+    }
+  }
+  if(!breakCandle) return null;
+
+  // Compute stop & target from break candle
+  const entry=breakCandle.c;
+  const li=breakIdx;
+  const tlv=trendline.slope*li+trendline.intercept;
   const oppPool=trend==='up'?highs:lows;
   const oppTaps=findValidTaps(oppPool,4,2,3)||oppPool.slice(-2);
   const safetyLine=oppTaps&&oppTaps.length>=2?linReg(oppTaps):null;
@@ -155,37 +181,43 @@ function detectSignal(candles){
   }
 
   const riskDist=Math.abs(entry-stop);
-  if(riskDist===0)return null;
+  if(riskDist===0) return null;
 
   let target;
   if(trend==='up'){const fh=highs.filter(h=>h.price>entry);target=fh.length?Math.min(...fh.map(h=>h.price)):entry+riskDist*2.5;}
   else{const fl=lows.filter(l=>l.price<entry);target=fl.length?Math.max(...fl.map(l=>l.price)):entry-riskDist*2.5;}
 
   const rMultiple=Math.abs(target-entry)/riskDist;
-  if(rMultiple<2)return null;
+  if(rMultiple<2) return null;
 
   const sweep=detectSweep(candles,highs,lows,trend);
+  const bodyRatio=(Math.abs(breakCandle.c-breakCandle.o)/(breakCandle.h-breakCandle.l||1e-9)*100).toFixed(0);
 
   return{
-    trend,
-    direction:trend==='up'?'Long':'Short',
+    trend,direction:trend==='up'?'Long':'Short',
     entry,stop,target,rMultiple,riskDist,
-    taps:taps.length,
-    spanWeeks:(span/H4W).toFixed(1),
-    priorBreaks,
-    bodyRatio:(bodyRatio*100).toFixed(0),
-    sweep,stopNote
+    taps:taps.length,spanWeeks:(span/H4W).toFixed(1),
+    priorBreaks,bodyRatio,sweep,stopNote,
+    candlesSinceBreak:candles.length-1-breakIdx
   };
 }
 
 function backtestPair(symbol,candles){
   const trades=[];let cooldown=0;
+  const atrSeries=calcATR(candles,14);
+
   for(let i=80;i<candles.length-MAX_HOLD;i++){
     if(cooldown>0){cooldown--;continue;}
-    const sig=detectSignal(candles.slice(0,i+1));
+    // Use sequential approach: check for break in the slice up to candle i
+    const slice=candles.slice(0,i+1);
+    const sliceATR=atrSeries.slice(0,i);
+    const sig=detectBreak(slice,sliceATR);
     if(!sig)continue;
+
+    // Entry at close of break candle (already priced into sig.entry)
     const{direction,entry,stop,target,rMultiple,riskDist}=sig;
     let outcome='timeout',actualR=0,exitCandle=i;
+
     for(let j=i+1;j<=i+MAX_HOLD&&j<candles.length;j++){
       const c=candles[j];
       if(direction==='Long'){
@@ -201,10 +233,14 @@ function backtestPair(symbol,candles){
       actualR=(direction==='Long'?ep-entry:entry-ep)/riskDist;
       exitCandle=Math.min(i+MAX_HOLD,candles.length-1);
     }
-    trades.push({symbol,direction,outcome,actualR:parseFloat(actualR.toFixed(2)),
+
+    trades.push({
+      symbol,direction,outcome,
+      actualR:parseFloat(actualR.toFixed(2)),
       entryDate:new Date(candles[i].t).toISOString().split('T')[0],
       exitDate:new Date(candles[exitCandle].t).toISOString().split('T')[0],
-      rMultiple:parseFloat(rMultiple.toFixed(2))});
+      rMultiple:parseFloat(rMultiple.toFixed(2))
+    });
     cooldown=COOLDOWN;
   }
   return trades;
@@ -224,19 +260,24 @@ function calcStats(trades){
     const dd=peak-running;if(dd>maxDD)maxDD=dd;
     if(t.actualR<0){cl++;maxCL=Math.max(maxCL,cl);}else cl=0;
   }
-  return{total:trades.length,wins:wins.length,losses:losses.length,timeouts:timeouts.length,
+  return{
+    total:trades.length,wins:wins.length,losses:losses.length,timeouts:timeouts.length,
     winRate:(wins.length/trades.length*100).toFixed(1),
     totalR:totalR.toFixed(2),avgR:(totalR/trades.length).toFixed(2),
     avgWin:wins.length?(wins.reduce((a,t)=>a+t.actualR,0)/wins.length).toFixed(2):'N/A',
     avgLoss:losses.length?(losses.reduce((a,t)=>a+t.actualR,0)/losses.length).toFixed(2):'N/A',
-    maxDD:maxDD.toFixed(2),maxCL,equity};
+    maxDD:maxDD.toFixed(2),maxCL,equity
+  };
 }
 
 async function fetchCandles(symbol){
   const url='https://api.twelvedata.com/time_series?symbol='+encodeURIComponent(symbol)+'&interval=4h&outputsize=5000&apikey='+API_KEY;
   const data=await get(url);
   if(data.status==='error'||!data.values)throw new Error(data.message||'No data');
-  return data.values.map(v=>({t:new Date(v.datetime).getTime(),o:parseFloat(v.open),h:parseFloat(v.high),l:parseFloat(v.low),c:parseFloat(v.close)})).reverse();
+  return data.values.map(v=>({
+    t:new Date(v.datetime).getTime(),
+    o:parseFloat(v.open),h:parseFloat(v.high),l:parseFloat(v.low),c:parseFloat(v.close)
+  })).reverse();
 }
 
 async function main(){
@@ -306,11 +347,11 @@ footer{margin-top:40px;font-size:11px;color:var(--muted);text-align:center;line-
 <body>
 <div class="wrap">
 <h1>Backtest Results</h1>
-<div class="meta">Spiraled H4 · Tori Trades A+ · Walk-forward, no look-ahead · ${runDate}</div>
+<div class="meta">Spiraled H4 · Tori Trades A+ · Sequential compression→break · Walk-forward, no look-ahead · ${runDate}</div>
 
 <div class="rules">
-  <strong>Rules applied:</strong> H4 trend (HH/HL or LH/LL) &nbsp;·&nbsp; 2–3 tap trendline &nbsp;·&nbsp; ≥1 week span &nbsp;·&nbsp; Moderate slope &nbsp;·&nbsp; Max 1 prior failed break &nbsp;·&nbsp; Price within 1.5×ATR of line &nbsp;·&nbsp; Body-dominant close >55% &nbsp;·&nbsp; Safety line stop &nbsp;·&nbsp; ≥2R to next structure<br>
-  <strong>Visual judgment calls excluded (manual):</strong> Controlled pullbacks · Clear path to target · News filter · Liquidity sweep quality
+  <strong>Rules applied:</strong> H4 trend (HH/HL or LH/LL) &nbsp;·&nbsp; 2–3 tap trendline &nbsp;·&nbsp; ≥1 week span &nbsp;·&nbsp; Moderate slope &nbsp;·&nbsp; Max 1 prior failed break &nbsp;·&nbsp; Body-dominant close >55% &nbsp;·&nbsp; Break candle preceded by candle on correct side &nbsp;·&nbsp; Safety line stop &nbsp;·&nbsp; ≥2R to next structure<br>
+  <strong>Sequential logic:</strong> compression and break are detected as separate phases — the break candle must follow a candle that was still on the trendline side.
 </div>
 
 <h2>Combined — All Pairs</h2>
@@ -327,10 +368,10 @@ ${combined?`
 </div>
 <div class="expectancy ${parseFloat(combined.avgR)>=0?'pos':'neg'}">
   ${parseFloat(combined.avgR)>=0?'✅ Positive expectancy — strategy has edge over this period.':'⚠️ Negative expectancy — review rule calibration or sample size.'}
-  &nbsp; Avg ${combined.avgR}R per trade across ${combined.total} signals.
+  &nbsp;Avg ${combined.avgR}R per trade across ${combined.total} signals.
 </div>
 <div class="chart-box"><canvas id="eqAll"></canvas></div>
-`:'<p style="color:var(--muted);padding:10px 0;font-size:13px;">No trades generated.</p>'}
+`:'<p style="color:var(--muted);padding:10px 0;font-size:13px;">No trades generated across any pair.</p>'}
 
 ${results.map(r=>{
   if(r.error)return '<div class="pair-section"><h2>'+r.symbol+'</h2><p style="color:var(--terra);font-size:13px;">Error: '+r.error+'</p></div>';
@@ -349,7 +390,7 @@ ${results.map(r=>{
     </div>
     <div class="chart-box"><canvas id="eq_${r.symbol.replace('/','_')}"></canvas></div>
     <table>
-      <thead><tr><th>Entry</th><th>Exit</th><th>Dir</th><th>Outcome</th><th>Actual R</th><th>Target R</th></tr></thead>
+      <thead><tr><th>Entry date</th><th>Exit date</th><th>Dir</th><th>Outcome</th><th>Actual R</th><th>Target R</th></tr></thead>
       <tbody>${r.trades.map(t=>`<tr>
         <td>${t.entryDate}</td><td>${t.exitDate}</td><td>${t.direction}</td>
         <td class="${t.outcome}">${t.outcome==='win'?'✓ Win':t.outcome==='loss'?'✗ Loss':'~ Timeout'}</td>
@@ -360,7 +401,7 @@ ${results.map(r=>{
   </div>`;
 }).join('')}
 
-<footer>Walk-forward backtest — signal detection uses only data available at each entry point in time.<br>Past results do not guarantee future performance. Always verify setups visually and check news before trading.</footer>
+<footer>Walk-forward backtest — only data available at each entry point used per signal.<br>Past results do not guarantee future performance. Always verify setups visually and check news before trading.</footer>
 </div>
 <script>
 function drawEq(id,eq,label){
